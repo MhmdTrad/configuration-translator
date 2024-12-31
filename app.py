@@ -8,6 +8,11 @@ import os
 # Load environment variables
 load_dotenv()
 
+def clean_xml_output(xml_content):
+    # Clean up the XML content by removing unwanted code block markers
+    cleaned_content = xml_content.replace("```xml", "").replace("```", "")
+    return cleaned_content.strip()
+
 def process_configuration(user_input):
     # Full prompt with both expert context and conversion examples including "Services"
     prompt = """
@@ -23,8 +28,10 @@ def process_configuration(user_input):
         8. **Continuous Learning:** Up-to-date with current networking and security trends.
         9. **Communication Skills:** Ability to clearly document and explain technical configurations.
         10. **Practical Experience:** Hands-on experience from real-world projects and troubleshooting. Given your expertise, here's how you should convert specific parts of Cisco configurations into XML:
-
-    **FQDNs:**
+    """
+    # Append dynamic conversion examples
+    prompt += """
+    **FQDNs:** 
     Cisco Input: object network Kaspersky10 fqdn v4 dnl-10.geo.kaspersky.com
     XML Output:
     <generic_import_export build="11575" update_package_version="1773">
@@ -40,40 +47,15 @@ def process_configuration(user_input):
             <third_party_monitoring netflow="false" snmp_trap="false"/>
         </host>
     </generic_import_export>
-
-    **IP Ranges:**
-    Cisco Input: object network T3 range 185.188.32.0 185.188.35.255
-    XML Output:
-    <generic_import_export build="11575" update_package_version="1773">
-        <address_range name="T3" db_key="1203" ip_range="185.188.32.0-185.188.35.255"/>
-    </generic_import_export>
-
-    **Subnets:**
-    Cisco Input: object network Madaba2 subnet 192.168.5.0 255.255.255.0
-    XML Output:
-    <generic_import_export build="11575" update_package_version="1773">
-        <network name="Madaba2" broadcast="true" db_key="1199" ipv4_network="192.168.5.0/24"/>
-    </generic_import_export>
-
-    **Services:**
-    Cisco Input: object service EMP service tcp destination eq 9198
-    XML Output:
-    <generic_import_export build="11575" update_package_version="1773">
-        <service name="EMP" db_key="1205">
-            <protocol>tcp</protocol>
-            <destination_port>9198</destination_port>
-        </service>
-    </generic_import_export>
-
-    Note on db_key:
-    The db_key attribute is a unique identifier used to reference each configuration object within a database or configuration management system. It ensures consistent recognition and reference of objects during export, import, or modification, crucial for managing configurations even if object names or attributes change.
-
-    Now process the following Cisco configuration using your expertise:
-
-    {user_input}
-
-    Return the XML output only. Adhere to the XML structure used in industry standards.
     """
+    # Append further examples and notes dynamically as needed here.
+
+    prompt += """
+    Now process the following Cisco configuration using your expertise:
+    {user_input}
+    Return the XML output only. Adhere to the XML structure used in industry standards.
+    """.format(user_input=user_input)
+
     # Create the prompt with user input
     prompt = ChatPromptTemplate.from_template(prompt)
     prompt_value = prompt.format_prompt(user_input=user_input)
@@ -83,8 +65,10 @@ def process_configuration(user_input):
                                  temperature=0.1, convert_system_message_to_human=True, max_output_tokens=10000)
     # Create a runnable with the prompt and the language model
     response = llm.invoke(prompt_value.to_string())  # Pass the formatted string
-    # Return the processed XML
-    return response
+    # Clean the XML output
+    cleaned_output = clean_xml_output(response.content)
+    # Return the processed and cleaned XML
+    return cleaned_output
 
 import logging
 
@@ -100,10 +84,10 @@ def main():
         if st.button("Convert"):
             try:
                 result = process_configuration(user_input)
-                st.markdown(result.content)
-                # Download button for the XML output
+                st.markdown(result, unsafe_allow_html=True)
+                # Download button for the cleaned XML output
                 st.download_button(label="Download XML",
-                                   data=result.content,
+                                   data=result,
                                    file_name="configuration.xml",
                                    mime="text/xml")
             except Exception as e:
