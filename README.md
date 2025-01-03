@@ -1,7 +1,3 @@
-### README: Cisco Config to XML Converter
-
----
-
 # Cisco Config to XML Converter
 
 This application is designed to streamline the conversion of Cisco networking configurations into standardized XML format. It leverages cutting-edge AI from Google Generative AI (`gemini-pro`) to automate the process, ensuring accuracy and efficiency in transforming complex networking configurations. The app provides a user-friendly interface for uploading Cisco configuration files, processes them intelligently, and delivers well-structured XML outputs for seamless integration with other systems.
