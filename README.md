@@ -118,20 +118,3 @@ object network 212.118.7.19 host 212.118.7.19
 ## Contributing
 
 Contributions are welcome! Feel free to submit pull requests or open issues for enhancements or bug fixes.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-### Key Takeaways
-
-- Automate Cisco configuration translation for faster workflows.
-- Ensure XML compliance with minimal effort.
-- Boost productivity with cutting-edge AI-driven automation. 
-
----
-
